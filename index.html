@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=2.0" />
+    <title>Meme Generator</title>
+    <style>
+      body{
+        font-family: "EB Garamond", serif;
+        text-transform: uppercase;
+
+      }
+      .image-size {
+        width: 10rem;
+      }
+    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Lobster&family=Major+Mono+Display&family=Pacifico&family=Ubuntu+Sans:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
+  <body class="bg-gray-600 px-20 py-2">
+
+    <h1 class="my-8 text-white text-3xl font-bold text-center justify-center">
+      MEME GENERATOR
+    </h1>
+    <div class="categories space-y-3">
+      <div id="GOD" class="drop-zone bg-green-300 p-3 flex flex-row space-x-3 overflow-auto font-bold">
+        GOD
+      </div>
+      <div id="DECENT" class="drop-zone bg-yellow-300 p-3 flex flex-row space-x-3 overflow-auto font-bold">
+        DECENT
+      </div>
+      <div id="AVERAGE" class="drop-zone bg-gray-300 p-3 flex flex-row space-x-3 overflow-auto font-bold">
+        AVERAGE
+      </div>
+      <div id="TRASH" class="drop-zone bg-violet-300 p-3 flex flex-row space-x-3 overflow-auto font-bold">
+        TRASH
+      </div>
+      <div id="INTOLERABLE" class="drop-zone bg-red-300 p-3 flex flex-row space-x-3 overflow-auto font-bold">
+        INTOLERABLE
+      </div>
+      </div>
+    </div>
+
+  <h2 class="mt-8 flex justify-center text-white text-xl font-bold text-center w-full " >ADD CUSTOM CATEGORIES</h2>
+
+
+    <div class="custom-category flex gap-2 py-8 ">
+      <input
+        type="text"
+        id="categoryName"
+        placeholder="Enter Category Name"
+        class="text-sm p-2 border rounded"
+      />
+      <input
+        type="color"
+        id="categoryColor"
+        value="#8db6a5"
+        class="border rounded"
+      />
+      <button
+        id="addCategory"
+        class="bg-violet-500 p-2 text-white rounded hover:bg-violet-400"
+      >
+        Add Category
+      </button>
+      
+    </div>
+    
+    <div class="space-y-3 flex flex-col overflow-auto w-full mb-8" id="categories"></div>
+
+    <div class="upload my-8">
+      <h2 class="text-white text-xl font-bold text-center justify-center">UPLOAD IMAGES</h2>
+      <input
+        type="file"
+        id="imageUpload"
+        accept="image/*"
+        multiple
+        class="w-full my-8 text-sm text-slate-500 file:mr-4 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:gb-violet-100"
+      />
+    </div>
+    <div class="images grid grid-cols-8 gap-4" id="imageContainer"></div>
+
+    <script>
+      document
+        .getElementById("addCategory")
+        .addEventListener("click", function () {
+          const categoryName = document
+            .getElementById("categoryName")
+            .value.trim();
+            document.getElementById("categoryName").value='';
+          const categoryColor = document.getElementById("categoryColor").value;
+          function getRandomColor() {
+              var letters = '0123456789ABCDEF';
+              var color = '#';
+              for (var i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+              }
+              return color;
+            }
+          document.getElementById("categoryColor").value=getRandomColor();
+          if (categoryName.length === 0) {
+            alert("Enter a category Name");
+            return;
+          }
+          console.log(categoryColor, categoryName);
+          const categoryContainer = document.getElementById("categories");
+          const newcategory = document.createElement("div");
+          newcategory.classList.add(
+            "category",
+            "drop-zone",
+            "flex",
+            "flex-row",
+            "space-x-3",
+            "overflow-auto",
+            "p-3",
+            `bg-[${categoryColor}]`
+          );
+
+          newcategory.innerHTML = `<h2 class=" font-bold ">${categoryName}</h2>`;
+          categoryContainer.appendChild(newcategory);
+
+          newcategory.addEventListener("dragover", (event) => {
+            event.preventDefault();
+            newcategory.classList.add("bg-green-400");
+          });
+          newcategory.addEventListener("dragleave", (event) => {
+            event.preventDefault();
+            newcategory.classList.remove("bg-green-400");
+          });
+          newcategory.addEventListener("drop", (event) => {
+            event.preventDefault();
+            newcategory.classList.remove("bg-green-400");
+            const id = event.dataTransfer.getData("text");
+            console.log("dropped", id);
+            const draggableElement = document.getElementById(id);
+            newcategory.appendChild(draggableElement);
+          });
+        });
+
+      document
+        .getElementById("imageUpload")
+        .addEventListener("change", function (e) {
+          const imageContainer = document.getElementById("imageContainer");
+          const files = e.target.files;
+
+          for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            const reader = new FileReader();
+            reader.onload = function (e) {
+              const img = document.createElement("img");
+              img.src = e.target.result;
+              img.classList.add("draggable", "image-size");
+              img.draggable = true;
+              img.alt = "Uploaded Image";
+              img.id = "uploaded image " + i;
+              imageContainer.appendChild(img);
+
+              img.addEventListener("dragstart", (e) => {
+                e.dataTransfer.setData("text", e.target.id);
+              });
+            };
+            reader.readAsDataURL(file);
+          }
+        });
+
+      document.querySelectorAll(".draggable").forEach((item) => {
+        item.addEventListener("dragstart", (e) => {
+          e.dataTransfer.setData("text", e.target.id);
+          console.log("TEST", e.target.id);
+        });
+      });
+
+      document.querySelectorAll(".drop-zone").forEach((zone) => {
+        zone.addEventListener("dragover", (event) => {
+          event.preventDefault();
+          zone.classList.add("bg-green-400");
+        });
+        zone.addEventListener("dragleave", (event) => {
+          event.preventDefault();
+          zone.classList.remove("bg-green-400");
+        });
+        zone.addEventListener("drop", (event) => {
+          event.preventDefault();
+          zone.classList.remove("bg-green-400");
+          const id = event.dataTransfer.getData("text");
+          console.log("dropped", id);
+          const draggableElement = document.getElementById(id);
+          zone.appendChild(draggableElement);
+        });
+      });
+    </script>
+  </body>
+</html>
